@@ -177,15 +177,15 @@ This comprehensive logging system allows you to:
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 ## How to Run the Project
 Backend Setup
-Navigate to the backend directory:      cd backend
-Install Python dependencies:            pip install -r requirements.txt
-Start the FastAPI server:               python main.py
+Navigate to the backend directory:      "cd backend"
+Install Python dependencies:            "pip install -r requirements.txt"
+Start the FastAPI server:               "python main.py"
 
 The backend will run on http://localhost:8000
 
 ## Frontend Setup
-Open a new terminal and navigate to the frontend directory:     cd frontend
-Install Node.js dependencies:                                   npm install
-Start the React development server:                             npm start
+Open a new terminal and navigate to the frontend directory:     "cd frontend"
+Install Node.js dependencies:                                   "npm install"
+Start the React development server:                             "npm start"
 
 The frontend will run on http://localhost:3000
