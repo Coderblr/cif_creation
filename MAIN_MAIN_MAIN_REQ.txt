@@ -1,0 +1,173 @@
+# --- Core FastAPI stack ---
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+passlib[bcrypt]
+python-jose[cryptography]
+httpx
+fastapi[all]
+pycryptodome
+# --- Database ---
+sqlalchemy
+databases
+asyncpg
+psycopg2-binary
+sqlite-utils
+
+# --- NoSQL databases ---
+motor
+pymongo
+redis
+firebase-admin
+
+# --- File handling and storage ---
+aiofiles
+boto3
+google-cloud-storage
+minio
+
+# --- Data processing ---
+pandas
+openpyxl
+numpy
+xlrd
+pyexcel
+pyexcel-xlsx
+csvkit
+
+# --- Document processing ---
+PyPDF2
+pdfplumber
+python-docx
+python-pptx
+
+# --- Web scraping and API interaction ---
+requests
+beautifulsoup4
+lxml
+
+# --- Cryptography & security ---
+pycryptodome
+cryptography
+secure
+
+# --- Machine Learning & NLP ---
+scikit-learn
+matplotlib
+seaborn
+nltk
+gensim
+transformers
+torch
+
+# --- Streamlit ---
+streamlit
+
+# --- Regex engine ---
+regex
+
+# --- Utilities ---
+tqdm
+loguru
+python-dotenv
+schedule
+aiohttp
+uvloop
+orjson
+aioredis
+msgpack
+
+# --- Development & Testing ---
+pytest
+pytest-asyncio
+ipython
+jupyter
+faker
+mimesis
+random-word
+names
+lorem
+httpie
+
+# --- Background tasks ---
+celery
+flower
+dramatiq
+rq
+
+# --- Image processing ---
+Pillow
+opencv-python
+
+# --- Rate limiting ---
+slowapi
+
+# --- Tracing & Monitoring ---
+opentelemetry-api
+opentelemetry-sdk
+prometheus-client
+sentry-sdk
+
+# --- Email & Notifications ---
+fastapi-mail
+twilio
+sendgrid
+
+# --- SSR (Server Side Rendering) ---
+jinja2
+aiofiles
+
+# --- Extra ---
+ollama
+python-mitmproxy
+apscheduler
+#Web framework
+fastapi
+uvicorn[standard]
+
+#Langchain & Ecosystem
+langchain
+langchain-community
+langchain-core
+langchain-groq
+
+#Vectorstore
+chromadb
+
+#Embeddings
+sentence-transformers
+
+#PDF parsing
+PyPDF
+
+#Environment Variables
+python-dotenv
+
+# Typing and Utilities
+pydantic
+requests
+
+#Logging
+loguru
+
+#File uploads
+aiofiles
+
+#Frontend
+streamlit
+
+langchain-huggingface
+langchain-chroma
+python-multipart
+
+# for openai
+openai
+pillow  #images
+langchain-openai
+
+
+fastapi[standard]
+pyjwt
+passlib[bcrypt]
+sqlmodel
