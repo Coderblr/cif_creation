@@ -1,0 +1,304 @@
+'use client'; 
+
+import React, { useState } from 'react';
+
+export default function CreateCifForm() {
+  const [region, setRegion] = useState('');
+  const [numberOfCif, setNumberOfCif] = useState('');
+  const [customerType, setCustomerType] = useState('');
+  const [status, setStatus] = useState('');
+  const [cifData, setCifData] = useState([]);
+
+  // Replace with the actual URL of your backend server
+  const BACKEND_URL = 'http://10.0.13.39:5050'; 
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setStatus('Submitting...');
+    setCifData([]);
+
+    // Create the data object to be sent in the request body
+    const requestBody = {
+      region,
+      numberOfCif: parseInt(numberOfCif), // Ensure number is an integer
+      customerType,
+    };
+
+    try {
+      // FIX: Use the POST method and the correct endpoint
+      const response = await fetch(`${BACKEND_URL}/customers/`, { 
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        // Parse the error message from the response body if available
+        const errorData = await response.json();
+        throw new Error(`HTTP error! Status: ${response.status}. Detail: ${errorData.detail || 'Unknown error'}`);
+      }
+
+      const result = await response.json();
+      console.log('Success:', result);
+      setStatus('Form submitted successfully!');
+      setCifData(result.cif_data); // Access the 'cif_data' key from the response
+    } catch (error) {
+      console.error('Error:', error);
+      setStatus(`Failed to submit form: ${error.message}`);
+    }
+  };
+
+  return (
+    <div className="container">
+      <h1>Create CIF</h1>
+      <form onSubmit={handleSubmit}>
+        {/* ... form inputs ... */}
+        <div className="form-group">
+          <label htmlFor="region">Region:</label>
+          <select
+            id="region"
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            required
+          >
+            <option value="">Select Region</option>
+            <option value="north">x</option>
+            <option value="south">y</option>
+            <option value="east">z</option>
+            <option value="west">a</option>
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="numberOfCif">No. of CIF:</label>
+          <input
+            type="number"
+            id="numberOfCif"
+            value={numberOfCif}
+            onChange={(e) => setNumberOfCif(e.target.value)}
+            min="1"
+            max="99999"
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="customerType">Customer Type:</label>
+          <select
+            id="customerType"
+            value={customerType}
+            onChange={(e) => setCustomerType(e.target.value)}
+            required
+          >
+            <option value="">Select Customer Type</option>
+            <option value="010203">PERSONAL-PUBLIC-OTHERS</option>
+            <option value="010101">PERSONAL-STAFF-SUPERVISING</option>
+            <option value="01020305">OTHERS</option>
+          </select>
+        </div>
+        <button type="submit">Submit</button>
+      </form>
+      {status && <p>{status}</p>}
+
+      {cifData?.length > 0 && (
+        <div className="cif-data-display">
+          <h2>Generated CIF Data</h2>
+          {cifData.map((cif, index) => (
+            <div key={index} className="cif-entry">
+              <h3>CIF Record {index + 1}</h3>
+              <pre>{JSON.stringify(cif, null, 2)}</pre>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <style jsx>{`
+        .container {
+          padding: 20px;
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        .form-group {
+          margin-bottom: 15px;
+        }
+        label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: bold;
+        }
+        input[type='number'],
+        select {
+          width: 100%;
+          padding: 8px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+        }
+        button {
+          padding: 10px 20px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        button:hover {
+          background-color: #0056b3;
+        }
+        .cif-data-display {
+          margin-top: 20px;
+          border-top: 2px solid #eee;
+          padding-top: 20px;
+        }
+        .cif-entry {
+          background-color: #f9f9f9;
+          border: 1px solid #ddd;
+          padding: 15px;
+          margin-bottom: 15px;
+          border-radius: 8px;
+          font-family: monospace;
+          white-space: pre-wrap;
+        }
+        h2, h3 {
+          color: #333;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+
+
+
+
+from datetime import timedelta
+from typing import Annotated
+from contextlib import asynccontextmanager
+from fastapi import Depends, FastAPI, HTTPException, status, Query
+from fastapi.security import OAuth2PasswordRequestForm
+from models import AuthToken
+from schemas import User
+from db import DBS
+from core import Security
+from core import EIS_API
+import json
+import sys
+from pathlib import Path
+from fastapi.middleware.cors import CORSMiddleware
+import requests
+from core.payload import generate_cif_entry 
+
+# A list of origins that are permitted to make cross-origin requests
+origins = [
+    "http://localhost:5050",
+    "http://10.0.125.114:3000",
+    
+]
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Application startup: Initializing resources...")
+    DBS.create_db_and_tables()
+    yield
+    print("Application shutdown: Cleaning up resources...")
+
+app = FastAPI(lifespan=lifespan)
+
+
+
+app.post("/cif_creation/{id}")
+def create_cif(id: int):
+    if id <= 0:
+        return {"error": "ID must be greater than 0"}
+    customer = [generate_cif_entry() for _ in range(id)]
+    
+    return {"count": id, "customer": customer}
+
+@app.get("/cif_creation/")
+async def get_cif_entry():
+    #sing;e one 
+    cif_entry = generate_cif_entry()
+    
+    print(cif_entry)
+    return {"payload": cif_entry}
+
+
+def get_some_data(cif_entry, RRN):
+
+    response_data = EIS_API.get_data(cif_entry, RRN)
+    
+    return response_data
+
+
+
+
+
+
+@app.post("/token")
+async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: DBS.SessionDep) -> AuthToken.Token:
+    user = Security.authenticate_user(form_data.username, form_data.password,db)
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=Security.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = Security.create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    #logger.info("Token provided to {user.firstName} + {user.lastName}")
+    return AuthToken.Token(access_token=access_token, token_type="bearer")
+
+@app.post("/user")
+def register(user: User.DBUser, session: DBS.SessionDep) -> User.DBUser:
+    user.password = Security.pwd_context.hash(user.password)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+
+def generate_random_name():
+    return random.choice(["Amit", "Sneha", "Harshada", "Rahul", "Neha", "Raj"])
+
+def generate_cif_entry() -> Dict[str, Any]:
+    RRN = "SBIR126261125195557074929"
+    return {
+       
+       
+        "VISUALLY IMPAIRED": "N",
+        "REQUEST FOR INB": "N",
+        "NATIONALITY": random.choice(COUNTRY_CODE),
+        "OVD_KYC_DOCUMENT_DETAILS": str(uuid.uuid4())[:12],
+        "CUSTOMER TYPE": random.choice(CUSTOMER_TYPE),
+       # "CIS ORGANISATION_CODE": "42",
+        "STATE": random.choice(STATE_CODE),
+        "CUSTOMER EVALUATION_REQUIRED": random.choice(["N", "Y"]),
+        "LAST NAME": generate_random_name(),
+        "FIRST NAME": generate_random_name(),
+        "PAN AADHAR LINK": "N",
+        "MIDDLE NAME": generate_random_name(),
+        "DATE OF BIRTH": "21071999",
+        "TRANSACTION DATE": datetime.now().strftime("%Y%m%d"),
+        "VILLAGE_CODE": random.choice(VILLAGE_CODES),
+        "CUSTOMER_TYPE_2": random.choice(CUSTOMER_TYPE),
+        #"BSR_ORGANISATION_CODE": "42"
+        "PAN_APPLIED_FLAG": "N",
+        "CUSTOMER_SEGMENT": "S",
+        "DOMESTIC_RISK": "ZZ",
+        "HOME_BRANCH": "00036",
+        "SUB_DISTRICT": "04199",
+        "EDUCATION_CODE": "01",
+        "CONSENT_DATE": "29082025",
+        "REQUEST_AUTH_ID": "3600005",
+        "TITLE": "03",
+        "INCOME_TAX_PAN": "",
+        "STREET_ROADNAME_BLOCK": "Maharashtra India 413403 Bavi",
+        "LOCALITY_VILLAGE_TEHSIL": "Malegaon Bk",
+        "SOURCE_OF_FUNDS": "01",
+        "RELATIVE_CODE": "F",
+        "REQUEST_REFERENCE_NUMBER": RRN
+    }
+
+
