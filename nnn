@@ -1,0 +1,39 @@
+// pages.js (or pages/index.js)
+
+import React, { useEffect, useState } from 'react';
+
+export default function CIFPage() {
+  const [cifData, setCifData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Replace this IP with your backend IP if different
+    fetch('http://192.168.0.105:8000/cif_creation/')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setCifData(data.payload);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Fetch error:', err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div>Loading CIF data...</div>;
+  if (error) return <div>Error fetching data: {error}</div>;
+
+  return (
+    <div style={{ padding: '2rem' }}>
+      <h1>CIF Data</h1>
+      <pre>{JSON.stringify(cifData, null, 2)}</pre>
+    </div>
+  );
+}
